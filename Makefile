@@ -10,12 +10,11 @@ CFLAGS = -march=armv7-a -mfloat-abi=softfp -I$(SYSROOT)/usr/include
 LDFLAGS = -Wl,--fix-cortex-a8 -L$(SYSROOT)/usr/lib
 JAVA_HOME = /usr/lib/jvm/java-6-openjdk
 
-JARS = $(wildcard src/com/wedesoft/androidtest/*.java)
-OBJS = $(JARS:java=class)
+BUILD_SRC = src/com/wedesoft/androidtest/R.java
+SRC = $(sort $(BUILD_SRC) $(wildcard src/com/wedesoft/androidtest/*.java))
+OBJS = $(SRC:java=class)
 
-test: $(OBJS)
-
-all: $(TOOLCHAIN)
+all: $(TOOLCHAIN) $(BUILD_SRC) $(OBJS)
 
 src/com/wedesoft/androidtest/R.java:
 	$(SDK)/platform-tools/aapt package -v -f -m -S res -J src -M AndroidManifest.xml -I $(SDK)/platforms/android-10/android.jar
