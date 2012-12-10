@@ -37,11 +37,21 @@ src/com/wedesoft/androidtest/R.java:
 AndroidTest.keystore:
 	$(JAVA_HOME)/bin/keytool -genkeypair -validity 10000 -dname "CN=Wedesoft, L=London, S=United Kingdom, C=UK" -keystore $@ -storepass password -keypass password -alias AndroidTestKey -keyalg RSA
 
-install: bin/AndroidTest.apk
+install: install-emulator
+
+uninstall: uninstall-emulator
+
+install-emulator: bin/AndroidTest.apk
 	$(SDK)/platform-tools/adb -e install $<
 
-uninstall:
+install-device: bin/AndroidTest.apk
+	$(SDK)/platform-tools/adb -d install $<
+
+uninstall-emulator:
 	$(SDK)/platform-tools/adb -e uninstall com.wedesoft.androidtest
+
+uninstall-device:
+	$(SDK)/platform-tools/adb -d uninstall com.wedesoft.androidtest
 
 obj/com/wedesoft/androidtest/%.class: src/com/wedesoft/androidtest/%.java
 	$(JAVA_HOME)/bin/javac -d obj -classpath $(SDK)/platforms/android-10/android.jar:obj -sourcepath src $<
