@@ -14,12 +14,15 @@ BUILD_SRC = src/com/wedesoft/androidtest/R.java
 SRC = $(filter-out $(BUILD_SRC),$(wildcard src/com/wedesoft/androidtest/*.java))
 OBJS = $(subst src,obj,$(SRC:java=class) $(BUILD_SRC:java=class))
 
+BIN_MAGIC := $(shell mkdir bin > /dev/null 2>&1 || :)
+OBJ_MAGIC := $(shell mkdir obj > /dev/null 2>&1 || :)
+
 all: bin/AndroidTest.apk
 
 bin/AndroidTest.apk: bin/AndroidTest.signed.apk
 	$(SDK)/tools/zipalign -f 4 $< $@
 
-bin/AndroidTest.signed.apk: bin/AndroidTest.unsigned.apk 
+bin/AndroidTest.signed.apk: bin/AndroidTest.unsigned.apk AndroidTest.keystore
 	$(JAVA_HOME)/bin/jarsigner -keystore AndroidTest.keystore -storepass password -keypass password -signedjar $@ $< AndroidTestKey
 
 bin/AndroidTest.unsigned.apk: AndroidManifest.xml $(BUILD_SRC) $(OBJS) bin/classes.dex
@@ -47,7 +50,7 @@ obj/com/wedesoft/androidtest/%.class: src/com/wedesoft/androidtest/%.java
 	$(GCC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -f $(BUILD_SRC) bin/*.apk bin/*.dex obj/com/wedesoft/androidtest/*.class
+	rm -f $(BUILD_SRC) bin/*.apk bin/*.dex obj/com/wedesoft/androidtest/*.class *.keystore
 
 $(TOOLCHAIN):
 	$(NDK)/build/tools/make-standalone-toolchain.sh --install-dir=$@
