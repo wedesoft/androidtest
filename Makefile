@@ -16,6 +16,7 @@ OBJS = $(subst src,obj,$(SRC:java=class) $(BUILD_SRC:java=class))
 
 BIN_MAGIC := $(shell mkdir bin > /dev/null 2>&1 || :)
 OBJ_MAGIC := $(shell mkdir obj > /dev/null 2>&1 || :)
+LIB_MAGIC := $(shell mkdir lib > /dev/null 2>&1 || :)
 
 all: bin/AndroidTest.apk
 
