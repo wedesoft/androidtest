@@ -38,6 +38,9 @@ src/com/wedesoft/androidtest/R.java:
 AndroidTest.keystore:
 	$(JAVA_HOME)/bin/keytool -genkeypair -validity 10000 -dname "CN=Wedesoft, L=London, S=United Kingdom, C=UK" -keystore $@ -storepass password -keypass password -alias AndroidTestKey -keyalg RSA
 
+start-emulator:
+	$(SDK)/tools/emulator -wipe-data -avd Android
+
 install: install-emulator
 
 uninstall: uninstall-emulator
