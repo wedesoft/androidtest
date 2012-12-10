@@ -1,4 +1,6 @@
 src/com/wedesoft/androidtest/R.java
 *.keystore
 *.class
+*.dex
+*.apk
 *.un~
