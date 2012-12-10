@@ -14,22 +14,31 @@ BUILD_SRC = src/com/wedesoft/androidtest/R.java
 SRC = $(filter-out $(BUILD_SRC),$(wildcard src/com/wedesoft/androidtest/*.java))
 OBJS = $(subst src,obj,$(SRC:java=class) $(BUILD_SRC:java=class))
 
-all: bin/AndroidTest.signed.apk
+all: bin/AndroidTest.apk
+
+bin/AndroidTest.apk: bin/AndroidTest.signed.apk
+	$(SDK)/tools/zipalign -f 4 $< $@
 
 bin/AndroidTest.signed.apk: bin/AndroidTest.unsigned.apk 
 	$(JAVA_HOME)/bin/jarsigner -keystore AndroidTest.keystore -storepass password -keypass password -signedjar $@ $< AndroidTestKey
 
 bin/AndroidTest.unsigned.apk: AndroidManifest.xml $(BUILD_SRC) $(OBJS) bin/classes.dex
-	$(SDK)/platform-tools/aapt package -v -f -M AndroidManifest.xml -S res -I $(SDK)/platforms/android-10/android.jar -F $@ bin
+	$(SDK)/platform-tools/aapt package -f -M AndroidManifest.xml -S res -I $(SDK)/platforms/android-10/android.jar -F $@ bin
 
 bin/classes.dex: $(BUILD_SRC) $(OBJS)
 	$(SDK)/platform-tools/dx --dex --output=$@ obj lib
 
 src/com/wedesoft/androidtest/R.java:
-	$(SDK)/platform-tools/aapt package -v -f -m -S res -J src -M AndroidManifest.xml -I $(SDK)/platforms/android-10/android.jar
+	$(SDK)/platform-tools/aapt package -f -m -S res -J src -M AndroidManifest.xml -I $(SDK)/platforms/android-10/android.jar
 
 AndroidTest.keystore:
-	$(JAVA_HOME)/bin/keytool -genkeypair -validity 10000 -dname "CN=Wedesoft, L=London, S=United Kingdom, C=UK" -keystore $@ -storepass password -keypass password -alias AndroidTestKey -keyalg RSA -v
+	$(JAVA_HOME)/bin/keytool -genkeypair -validity 10000 -dname "CN=Wedesoft, L=London, S=United Kingdom, C=UK" -keystore $@ -storepass password -keypass password -alias AndroidTestKey -keyalg RSA
+
+install: bin/AndroidTest.apk
+	$(SDK)/platform-tools/adb -e install $<
+
+uninstall:
+	$(SDK)/platform-tools/adb -e uninstall com.wedesoft.androidtest
 
 obj/com/wedesoft/androidtest/%.class: src/com/wedesoft/androidtest/%.java
 	$(JAVA_HOME)/bin/javac -d obj -classpath $(SDK)/platforms/android-10/android.jar:obj -sourcepath src $<
@@ -38,7 +47,7 @@ obj/com/wedesoft/androidtest/%.class: src/com/wedesoft/androidtest/%.java
 	$(GCC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -f $(BUILD_SRC) bin/*.dex obj/com/wedesoft/androidtest/*.class
+	rm -f $(BUILD_SRC) bin/*.apk bin/*.dex obj/com/wedesoft/androidtest/*.class
 
 $(TOOLCHAIN):
 	$(NDK)/build/tools/make-standalone-toolchain.sh --install-dir=$@
