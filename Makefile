@@ -1,5 +1,5 @@
-.SUFFIXES: .java .class
 # http://geosoft.no/development/android.html
+.SUFFIXES: .java .class .dex .keystore .apk .c .o
 NDK = $(HOME)/android-ndk-r8b
 SDK = $(HOME)/android-sdk-linux
 TOOLCHAIN = /tmp/ndk-hello
@@ -14,7 +14,10 @@ BUILD_SRC = src/com/wedesoft/androidtest/R.java
 SRC = $(filter-out $(BUILD_SRC),$(wildcard src/com/wedesoft/androidtest/*.java))
 OBJS = $(subst src,obj,$(SRC:java=class) $(BUILD_SRC:java=class))
 
-all: bin/AndroidTest.unsigned.apk
+all: bin/AndroidTest.signed.apk
+
+bin/AndroidTest.signed.apk: bin/AndroidTest.unsigned.apk 
+	$(JAVA_HOME)/bin/jarsigner -keystore AndroidTest.keystore -storepass password -keypass password -signedjar $@ $< AndroidTestKey
 
 bin/AndroidTest.unsigned.apk: AndroidManifest.xml $(BUILD_SRC) $(OBJS) bin/classes.dex
 	$(SDK)/platform-tools/aapt package -v -f -M AndroidManifest.xml -S res -I $(SDK)/platforms/android-10/android.jar -F $@ bin
